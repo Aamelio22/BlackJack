@@ -1,24 +1,31 @@
-from turtle import clear
-
 from art import logo
-import os
+import sys, subprocess
 import random
 
 game = "run"
 cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+
 def clear():
-    os.system('cls')
+   operating_system = sys.platform
+   if operating_system == 'win32':
+       subprocess.run('cls', shell=True)
+   elif operating_system == 'linux' or operating_system == 'darwin':
+       subprocess.run('clear', shell=True)
 
 def get_cards(num):
     p_card = [cards[random.randint(0, len(cards) - 1)] for i in range(num)]
     return p_card
-
-
 def sum_cards(hand):
     total = 0
     for num in hand:
-        total += num
+      total += num
     return total
+
+def player_sum():
+    player_total = sum_cards(hand = player_hand)
+    print(f"  Your cards: {player_hand}, current score: {player_total}")
+    print(f"  Dealer's first card: {comp_hand[0]}")
+    return player_total
 
 
 def retry(game):
@@ -55,7 +62,7 @@ def get_result(ph, pt, ct):
     chance = over_21(total=pt, hand=ph)
     if chance["redeem"] == False or chance["total"] > 21:
         result = "It's a Bust! You Lose."
-    elif chance["total"] > comp_info["total"]:
+    elif chance["total"] > comp_info["total"] or comp_info["total"] > 21:
         result = "You Win"
     elif chance["total"] < comp_info["total"]:
         result = "You Lose"
@@ -68,30 +75,33 @@ def get_result(ph, pt, ct):
 game = retry(game)
 
 
-def add_card(player_hand):
+def add_card(hand):
     while True:
         user_choice = input("Type 'y' to get another card, or type 'n' to pass: ")
         if user_choice == "y":
             player_hand.append(get_cards(num=1)[0])
-            break
+            player_total = player_sum()
+            if player_total > 21:
+                break
         elif user_choice == "n":
+            player_total = player_sum()
             break
         else:
             print("Error, invalid input")
-    return player_hand
+    return player_hand, player_total
 
 
 while game == "run":
-  player_hand = get_cards(num = 2)
-  comp_hand = get_cards(num = 2)
-  print(f"Your cards: {player_hand}")
-  print(f"Dealer's first card: {comp_hand[0]}")
-  player_hand = add_card(hand = player_hand)
-  player_total = sum_cards(hand = player_hand)
-  comp_total = sum_cards(hand = comp_hand)
-  if comp_total < 17:
-    comp_hand.append(get_cards(num = 1)[0])
-  comp_info = over_21(total = comp_total, hand = comp_hand)
-  info = get_result(ph = player_hand, pt = player_total, ct = comp_total)
-  print(f"Your final hand: {info[1]}\nYour final total: {info[2]}\nDealer's final hand: {comp_hand}\nDealer's final total: {info[3]}\n{info[0]}")
-  game = retry(game)
+    player_hand = get_cards(num=2)
+    comp_hand = get_cards(num=2)
+    player_total = player_sum()
+    player_hand = add_card(hand=player_hand)
+    comp_total = sum_cards(hand=comp_hand)
+    while comp_total < 17:
+        comp_hand.append(get_cards(num=1)[0])
+        comp_total = sum_cards(hand=comp_hand)
+    comp_info = over_21(total=comp_total, hand=comp_hand)
+    info = get_result(ph=player_hand[0], pt=player_hand[1], ct=comp_total)
+    print(
+        f"  Your final hand: {info[1]}, final score: {info[2]}\n  Dealer's final hand: {comp_hand}, final score: {info[3]}\n{info[0]}")
+    game = retry(game)
