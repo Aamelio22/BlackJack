@@ -60,7 +60,7 @@ def get_result(ph, pt, ct):
     elif chance["total"] < comp_info["total"]:
         result = "You Lose"
     else:
-        result = "It's a tie!"
+        result = "It's a Draw!"
     info = [result, ph, chance["total"], ct]
     return info
 
@@ -82,15 +82,16 @@ def add_card(player_hand):
 
 
 while game == "run":
-    player_hand = get_cards(num=2)
-    comp_hand = get_cards(num=2)
-    print(f"Your cards: {player_hand}")
-    print(f"Computer's first card: {comp_hand[0]}")
-    player_hand = add_card(player_hand)
-    player_total = sum_cards(hand=player_hand)
-    comp_total = sum_cards(hand=comp_hand)
-    comp_info = over_21(total=comp_total, hand=comp_hand)
-    info = get_result(ph=player_hand, pt=player_total, ct=comp_total)
-    print(
-        f"Your final hand: {info[1]}\nYour final total: {info[2]}\nComputer's final hand: {comp_hand}\nComputer's final total: {info[3]}\n{info[0]}")
-    game = retry(game)
+  player_hand = get_cards(num = 2)
+  comp_hand = get_cards(num = 2)
+  print(f"Your cards: {player_hand}")
+  print(f"Dealer's first card: {comp_hand[0]}")
+  player_hand = add_card(hand = player_hand)
+  player_total = sum_cards(hand = player_hand)
+  comp_total = sum_cards(hand = comp_hand)
+  if comp_total < 17:
+    comp_hand.append(get_cards(num = 1)[0])
+  comp_info = over_21(total = comp_total, hand = comp_hand)
+  info = get_result(ph = player_hand, pt = player_total, ct = comp_total)
+  print(f"Your final hand: {info[1]}\nYour final total: {info[2]}\nDealer's final hand: {comp_hand}\nDealer's final total: {info[3]}\n{info[0]}")
+  game = retry(game)
